@@ -1,42 +1,37 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 
-function Jobs() {
-  const router = useRouter();
-  const {session_id} = router.query;
+function Jobs({ session_id }) {
   const [jobs, setJobs] = useState([]);
   const [selectedJobs, setSelectedJobs] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log("Initial render", { isReady: router.isReady, session_id });
+  console.log("session_id from props:", session_id);
 
   useEffect(() => {
-    if (!router.isReady || !session_id) return; // wait until router is ready
+    if (!session_id) return;
 
-    console.log("session_id:", session_id);
-  
     const fetchJobs = async () => {
       try {
         console.log("Fetching jobs for session:", session_id);
         const response = await fetch(`/api/jobs?sessionId=${session_id}`);
         console.log("Raw response:", response);
-  
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Error from API:", errorText);
           throw new Error("Failed to fetch jobs");
         }
-  
+
         const data = await response.json();
         console.log("Job data received:", data);
-  
+
         const jobsWithIds = data.map((job, index) => ({
           ...job,
           id: job.id || `${session_id}-${index}`,
           job_url: job.job_url || job.link || "#",
         }));
-  
+
         setJobs(jobsWithIds);
         setLoading(false);
       } catch (err) {
@@ -45,10 +40,9 @@ function Jobs() {
         setLoading(false);
       }
     };
-  
+
     fetchJobs();
-  }, [router.isReady, router.query]);
-  
+  }, [session_id]);
 
   const toggleSelection = (jobId) => {
     setSelectedJobs((prev) => {
@@ -113,11 +107,22 @@ function Jobs() {
               : "bg-gray-300"
           }`}
         >
-          Apply for {selectedJobs.size} Job{selectedJobs.size !== 1 ? "s" : ""}
+          Apply for {selectedJobs.size} Job
+          {selectedJobs.size !== 1 ? "s" : ""}
         </button>
       )}
     </div>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session_id = context.query.session_id || null;
+
+  return {
+    props: {
+      session_id,
+    },
+  };
 }
 
 export default Jobs;
