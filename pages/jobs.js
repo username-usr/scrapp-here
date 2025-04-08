@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-function JobList() {
+function Jobs() {
   const router = useRouter();
   const { session_id } = router.query;
   const [jobs, setJobs] = useState([]);
@@ -14,7 +14,7 @@ function JobList() {
 
     const fetchJobs = async () => {
       try {
-        const response = await fetch(`/api/receive_jobs?sessionId=${session_id}`);
+        const response = await fetch(`/api/jobs?sessionId=${session_id}`);
         if (!response.ok) throw new Error("Failed to fetch jobs");
 
         const data = await response.json();
@@ -106,4 +106,4 @@ function JobList() {
   );
 }
 
-export default JobList;
+export default Jobs;
