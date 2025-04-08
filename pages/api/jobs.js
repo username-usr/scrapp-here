@@ -10,6 +10,7 @@ export default function handler(req, res) {
       return res.status(400).json({ error: "Invalid payload" });
     }
 
+    console.log(jobs)
     console.log("Received jobs for session:", sessionId);
     jobStore[sessionId] = jobs;
 
@@ -30,5 +31,5 @@ export default function handler(req, res) {
   }
 
   res.setHeader('Allow', ['GET', 'POST']);
-  return res.status(405).end(`Method ${req.method} Not Allowed`);
+  return res.status(405).end(`Method ${req.method} Not Allowed`); 
 }
