@@ -15,6 +15,7 @@ function Jobs() {
     const fetchJobs = async () => {
       try {
         const response = await fetch(`/api/jobs?sessionId=${session_id}`);
+        console.log("from backend to UI", response);
         if (!response.ok) throw new Error("Failed to fetch jobs");
 
         const data = await response.json();
@@ -23,7 +24,7 @@ function Jobs() {
         const jobsWithIds = data.map((job, index) => ({
           ...job,
           id: job.id || `${session_id}-${index}`,
-          job_url: job.job_url || job.link || "#"
+          job_url: job.job_url || job.link || "#",
         }));
 
         setJobs(jobsWithIds);
@@ -39,7 +40,7 @@ function Jobs() {
   }, [session_id]);
 
   const toggleSelection = (jobId) => {
-    setSelectedJobs(prev => {
+    setSelectedJobs((prev) => {
       const updated = new Set(prev);
       updated.has(jobId) ? updated.delete(jobId) : updated.add(jobId);
       return updated;
@@ -47,7 +48,7 @@ function Jobs() {
   };
 
   const applyForJobs = () => {
-    const selected = jobs.filter(job => selectedJobs.has(job.id));
+    const selected = jobs.filter((job) => selectedJobs.has(job.id));
     alert(`Applying for ${selected.length} jobs.`);
     console.log("Selected:", selected);
   };
@@ -96,7 +97,9 @@ function Jobs() {
           onClick={applyForJobs}
           disabled={selectedJobs.size === 0}
           className={`w-full py-2 mt-6 rounded text-white ${
-            selectedJobs.size > 0 ? "bg-green-600 hover:bg-green-700" : "bg-gray-300"
+            selectedJobs.size > 0
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-gray-300"
           }`}
         >
           Apply for {selectedJobs.size} Job{selectedJobs.size !== 1 ? "s" : ""}
