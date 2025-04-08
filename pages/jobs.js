@@ -9,7 +9,6 @@ function JobList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch jobs based on session_id
   useEffect(() => {
     if (!session_id) return;
 
@@ -17,22 +16,21 @@ function JobList() {
       try {
         const response = await fetch(`/api/receive-jobs?sessionId=${session_id}`);
         if (!response.ok) throw new Error("Failed to fetch jobs");
-        
+
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error("Invalid job data");
 
-        // Add unique IDs if not present
         const jobsWithIds = data.map((job, index) => ({
           ...job,
           id: job.id || `${session_id}-${index}`,
-          job_url: job.job_url || job.link || "#" // Ensure job_url exists
+          job_url: job.job_url || job.link || "#"
         }));
-        
+
         setJobs(jobsWithIds);
         setLoading(false);
       } catch (err) {
-        console.error("Fetch error:", err);
-        setError("Failed to load jobs. Please try again.");
+        console.error(err);
+        setError("Could not load jobs. Please try again.");
         setLoading(false);
       }
     };
@@ -40,113 +38,70 @@ function JobList() {
     fetchJobs();
   }, [session_id]);
 
-  const toggleJobSelection = (jobId) => {
+  const toggleSelection = (jobId) => {
     setSelectedJobs(prev => {
-      const newSelected = new Set(prev);
-      newSelected.has(jobId) ? newSelected.delete(jobId) : newSelected.add(jobId);
-      return newSelected;
+      const updated = new Set(prev);
+      updated.has(jobId) ? updated.delete(jobId) : updated.add(jobId);
+      return updated;
     });
   };
 
   const applyForJobs = () => {
-    const selectedJobsArray = jobs.filter(job => selectedJobs.has(job.id));
-    console.log("Applying for:", selectedJobsArray);
-    alert(`Applying for ${selectedJobs.size} jobs!`);
-    // Here you would typically send to your backend
+    const selected = jobs.filter(job => selectedJobs.has(job.id));
+    alert(`Applying for ${selected.length} jobs.`);
+    console.log("Selected:", selected);
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 font-[Inter,Poppins,Helvetica,sans-serif] relative">
-      {/* Header */}
-      <h1 className="text-4xl font-extrabold text-center text-blue-700 mb-6">
-        Job Listings
-      </h1>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold text-center mb-6">Job Listings</h1>
 
-      {/* Apply Button */}
-      {jobs.length > 0 && (
-        <button
-          onClick={applyForJobs}
-          disabled={selectedJobs.size === 0}
-          className={`absolute top-8 right-8 px-4 py-2 rounded-md text-sm shadow-md transition-all ${
-            selectedJobs.size > 0
-              ? "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Apply ({selectedJobs.size})
-        </button>
+      {loading && <p className="text-center text-gray-500">Loading jobs...</p>}
+      {error && <p className="text-center text-red-600">{error}</p>}
+      {!loading && !error && jobs.length === 0 && (
+        <p className="text-center text-gray-600">No jobs found.</p>
       )}
 
-      {/* Loading/Error States */}
-      {loading && !error && (
-        <p className="text-center text-gray-600 text-lg animate-pulse">
-          Loading jobs...
-        </p>
-      )}
-      
-      {error && (
-        <p className="text-red-500 text-center text-lg">{error}</p>
-      )}
-
-      {/* Job List Grid */}
-      <div className="max-w-4xl mx-auto mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {!loading && !error && jobs.length === 0 && (
-          <p className="text-center text-gray-600 text-lg col-span-full">
-            No jobs found for this session.
-          </p>
-        )}
-
-        {jobs.map((job) => (
-          <div
-            key={job.id}
-            className={`relative p-5 bg-white shadow-md rounded-md flex flex-col justify-between border border-gray-200 transition-all duration-300 ${
-              selectedJobs.has(job.id)
-                ? "shadow-[0_0_15px_rgba(0,123,255,0.8)]"
-                : "hover:shadow-lg"
-            }`}
-          >
-            {/* Job Details */}
+      {jobs.map((job) => (
+        <div key={job.id} className="border p-4 mb-4 rounded-md shadow-sm">
+          <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">{job.title}</h2>
-              <p className="text-gray-600 mt-1">{job.company}</p>
-              <p className="text-gray-500 mt-1">{job.location}</p>
+              <h2 className="text-lg font-semibold">{job.title}</h2>
+              <p className="text-sm text-gray-700">{job.company}</p>
+              <p className="text-sm text-gray-500">{job.location}</p>
               {job.salary && job.salary !== "Salary not specified" && (
-                <p className="text-green-700 font-medium mt-2">{job.salary}</p>
+                <p className="text-sm text-green-600">{job.salary}</p>
               )}
               <a
                 href={job.job_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline mt-3 inline-block"
+                className="text-blue-500 underline text-sm mt-2 inline-block"
               >
-                View Job →
+                View Job
               </a>
             </div>
-
-            {/* Checkbox */}
             <input
               type="checkbox"
               checked={selectedJobs.has(job.id)}
-              onChange={() => toggleJobSelection(job.id)}
-              className="w-5 h-5 accent-blue-600 cursor-pointer mt-4 self-end"
+              onChange={() => toggleSelection(job.id)}
+              className="mt-1"
             />
           </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <footer className="mt-10 bg-white py-6 border-t border-gray-200 w-full">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="overflow-hidden whitespace-nowrap">
-            <span className="inline-block animate-marquee text-sm text-gray-500 font-medium">
-              Quoted by JobSeekers | Trusted by Thousands | Empowering Careers Worldwide
-            </span>
-          </div>
-          <p className="text-center text-gray-600 text-sm mt-4">
-            Made with ❤️ by Your Team
-          </p>
         </div>
-      </footer>
+      ))}
+
+      {jobs.length > 0 && (
+        <button
+          onClick={applyForJobs}
+          disabled={selectedJobs.size === 0}
+          className={`w-full py-2 mt-6 rounded text-white ${
+            selectedJobs.size > 0 ? "bg-green-600 hover:bg-green-700" : "bg-gray-400"
+          }`}
+        >
+          Apply for {selectedJobs.size} Job{selectedJobs.size !== 1 ? "s" : ""}
+        </button>
+      )}
     </div>
   );
 }
