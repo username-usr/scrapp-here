@@ -96,7 +96,7 @@ function JobList() {
           onClick={applyForJobs}
           disabled={selectedJobs.size === 0}
           className={`w-full py-2 mt-6 rounded text-white ${
-            selectedJobs.size > 0 ? "bg-green-600 hover:bg-green-700" : "bg-gray-400"
+            selectedJobs.size > 0 ? "bg-green-600 hover:bg-green-700" : "bg-gray-300"
           }`}
         >
           Apply for {selectedJobs.size} Job{selectedJobs.size !== 1 ? "s" : ""}
