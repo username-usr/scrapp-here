@@ -3,18 +3,16 @@ import { useRouter } from "next/router";
 
 function Jobs() {
   const router = useRouter();
-  const { session_id } = router.query;
+  const {session_id} = router.query;
   const [jobs, setJobs] = useState([]);
   const [selectedJobs, setSelectedJobs] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!router.isReady) return; // wait until router is ready
-  
-    const { session_id } = router.query;
+    if (!router.isReady || !session_id) return; // wait until router is ready
+
     console.log("session_id:", session_id);
-    if (!session_id) return;
   
     const fetchJobs = async () => {
       try {
