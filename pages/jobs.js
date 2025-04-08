@@ -10,30 +10,33 @@ function Jobs() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!session_id) return;
+    if (!router.isReady) return; // wait until router is ready
+  
+    const { session_id } = router.query;
     console.log("session_id:", session_id);
-
+    if (!session_id) return;
+  
     const fetchJobs = async () => {
       try {
-        console.log("Fetching jobs from API...");
+        console.log("Fetching jobs for session:", session_id);
         const response = await fetch(`/api/jobs?sessionId=${session_id}`);
         console.log("Raw response:", response);
+  
         if (!response.ok) {
-          const text = await response.text();
-          console.error("API Error Response Text:", text);
+          const errorText = await response.text();
+          console.error("Error from API:", errorText);
           throw new Error("Failed to fetch jobs");
         }
-
+  
         const data = await response.json();
         console.log("Job data received:", data);
-        if (!Array.isArray(data)) throw new Error("Invalid job data");
-
+  
         const jobsWithIds = data.map((job, index) => ({
           ...job,
           id: job.id || `${session_id}-${index}`,
           job_url: job.job_url || job.link || "#",
         }));
-
+  
         setJobs(jobsWithIds);
         setLoading(false);
       } catch (err) {
@@ -42,9 +45,10 @@ function Jobs() {
         setLoading(false);
       }
     };
-
+  
     fetchJobs();
-  }, [session_id]);
+  }, [router.isReady, router.query]);
+  
 
   const toggleSelection = (jobId) => {
     setSelectedJobs((prev) => {
