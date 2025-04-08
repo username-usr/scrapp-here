@@ -9,6 +9,8 @@ function Jobs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log("Initial render", { isReady: router.isReady, session_id });
+
   useEffect(() => {
     if (!router.isReady || !session_id) return; // wait until router is ready
 
