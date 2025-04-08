@@ -15,7 +15,7 @@ function JobList() {
 
     const fetchJobs = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/jobs/${session_id}`);
+        const response = await fetch(`/api/receive-jobs?sessionId=${sessionId}`);
         if (!response.ok) throw new Error("Failed to fetch jobs");
         
         const data = await response.json();
