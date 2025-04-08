@@ -11,14 +11,21 @@ function Jobs() {
 
   useEffect(() => {
     if (!session_id) return;
+    console.log("session_id:", session_id);
 
     const fetchJobs = async () => {
       try {
+        console.log("Fetching jobs from API...");
         const response = await fetch(`/api/jobs?sessionId=${session_id}`);
-        if (!response.ok) throw new Error("Failed to fetch jobs");
+        console.log("Raw response:", response);
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("API Error Response Text:", text);
+          throw new Error("Failed to fetch jobs");
+        }
 
         const data = await response.json();
-        console.log(data)
+        console.log("Job data received:", data);
         if (!Array.isArray(data)) throw new Error("Invalid job data");
 
         const jobsWithIds = data.map((job, index) => ({
