@@ -15,10 +15,10 @@ function Jobs() {
     const fetchJobs = async () => {
       try {
         const response = await fetch(`/api/jobs?sessionId=${session_id}`);
-        console.log("from backend to UI", response);
         if (!response.ok) throw new Error("Failed to fetch jobs");
 
         const data = await response.json();
+        console.log(data)
         if (!Array.isArray(data)) throw new Error("Invalid job data");
 
         const jobsWithIds = data.map((job, index) => ({
